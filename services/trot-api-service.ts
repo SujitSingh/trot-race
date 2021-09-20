@@ -1,11 +1,11 @@
-const config = require('../configs/config.js');
-const axios = require('axios');
+import config from '../configs/config';
+import axios from 'axios';
 
 class TrotApiService {
   apiRoot = config.apiRoot;
   token = ''
 
-  authenticateUser(email, password) {
+  authenticateUser(email?: string, password?: string) {
     return axios.post(this.apiRoot + '/auth', {
       email: email || config.user.email,
       password: password || config.user.password,
@@ -17,9 +17,9 @@ class TrotApiService {
     };
     return axios.get(this.apiRoot + '/results', { headers });
   }
-  setAuthToken(tokenValue) {
+  setAuthToken(tokenValue: string) {
     this.token = tokenValue;
   }
 }
 
-module.exports = new TrotApiService();
+export = new TrotApiService();

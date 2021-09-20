@@ -1,7 +1,6 @@
 require('dotenv').config();
-const mongoConnection = require('./configs/db-connection.js');
-
-const app = require('./app.js');
+import mongoConnection from './configs/db-connection';
+import app from './app';
 
 mongoConnection.connectDB().then(connection => {
   console.log('MongoDB connected');

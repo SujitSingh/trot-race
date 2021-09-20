@@ -1,4 +1,5 @@
-const RaceTableModel = require('../models/race-table-model.js');
+import RaceTableModel from '../models/race-table-model';
+import { HorseModel, RaceEventModel } from '../models/race-data-model';
 
 class RaceStoreService {
   saveRaceStatus(horsesEvents = []) {
@@ -60,7 +61,7 @@ class RaceStoreService {
       return updateObj;
     });
   }
-  createHorseObj(horse = {}) {
+  createHorseObj(horse: HorseModel) {
     const horseObj = {
       id: horse.id, // the DB row ID
       event: horse.event,
@@ -73,4 +74,4 @@ class RaceStoreService {
   }
 }
 
-module.exports = new RaceStoreService();
+export = new RaceStoreService();

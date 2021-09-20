@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const raceSchema = new mongoose.Schema({
   event: { type: String, required: true },
@@ -8,4 +8,4 @@ const raceSchema = new mongoose.Schema({
   finishTime: { type: Number, default: null },
 });
 
-module.exports = mongoose.model('Race', raceSchema, 'Race');
+export = mongoose.model('Race', raceSchema, 'Race');

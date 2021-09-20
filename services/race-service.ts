@@ -1,12 +1,14 @@
-const trotApiService = require('./trot-api-service.js');
-const raceStoreService = require('./race-store-service.js');
+
+import trotApiService from './trot-api-service';
+import raceStoreService from './race-store-service';
+import { HorseModel, RaceEventModel } from "../models/race-data-model";
 
 class RaceService {
   // for handling different activity of the race
   MAX_HORSES = 6;
   checkEventDelay = 15 * 1000; // 15 seconds
   checkFinishedDelay = 60 * 1000 + 1000; // 1 min + 1s
-  horsesMap = {};
+  horsesMap: { [index: number]: HorseModel } = {};
   timeoutId = null;
 
   async initiateRaceChecks() {
@@ -25,7 +27,7 @@ class RaceService {
       console.log('race start check');
       clearTimeout(this.timeoutId); // clear previous checks
       const response = await trotApiService.getRaceStatus();
-      const data = response.data;
+      const data: RaceEventModel = response.data;
       this.storeResponse(data);
       if (data && data.event === 'start') {
         // fetch remaining 5 horses info
@@ -87,7 +89,7 @@ class RaceService {
     }
   }
 
-  storeResponse(resp) {
+  storeResponse(resp: RaceEventModel) {
     if (!resp) {
       // save existing fetched infos to DB
       this.processHorsesInfoSaving();
@@ -95,7 +97,7 @@ class RaceService {
     }
     const currentTime = Date.now(),
           event = resp.event;
-    let horseInfo = {};
+    let horseInfo: HorseModel;
     if (this.horsesMap[resp.horse.id] && event === 'finish') {
       // updating existing info
       horseInfo = {
@@ -120,7 +122,7 @@ class RaceService {
     console.log('saving horses info -', this.horsesMap);
     this.saveHorsesInfoToDB(this.horsesMap);
   }
-  async saveHorsesInfoToDB(horsesMapArg = {}) {
+  async saveHorsesInfoToDB(horsesMapArg) {
     const horses = Object.values(horsesMapArg);
     try {
       const savedObj = await raceStoreService.saveRaceStatus(horses);
@@ -139,7 +141,7 @@ class RaceService {
       this.horsesMap[horse.horseId].id = horse.id;
     }
   }
-  removeSavedHorses(horseIds = []) {
+  removeSavedHorses(horseIds: string[] = []) {
     // remove horses entry
     for (let id of horseIds) {
       delete this.horsesMap[id];
@@ -160,4 +162,4 @@ class RaceService {
   }
 }
 
-module.exports = new RaceService();
+export = new RaceService();
