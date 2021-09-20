@@ -1,12 +1,13 @@
 const trotApiService = require('./trot-api-service.js');
+const raceStoreService = require('./race-store-service.js');
 
 class RaceService {
   // for handling different activity of the race
   MAX_HORSES = 6;
   checkEventDelay = 15 * 1000; // 15 seconds
-  checkFinishedDelay = 60 * 1000; // 1 min
+  checkFinishedDelay = 60 * 1000 + 1000; // 1 min + 1s
   horsesMap = {};
-  intervalId = null;
+  timeoutId = null;
 
   async initiateRaceChecks() {
     try {
@@ -22,6 +23,7 @@ class RaceService {
   async initiateRaceStartCheck() {
     try {
       console.log('race start check');
+      clearTimeout(this.timeoutId); // clear previous checks
       const response = await trotApiService.getRaceStatus();
       const data = response.data;
       this.storeResponse(data);
@@ -33,7 +35,7 @@ class RaceService {
         this.initiateRaceStartCheck();
       } else {
         // race yet to start
-        setTimeout(() => {
+        this.timeoutId = setTimeout(() => {
           this.initiateRaceStartCheck();
         }, this.checkEventDelay);
       }
@@ -77,9 +79,8 @@ class RaceService {
         this.handleAPIError(error);
       }).finally(() => {
         if (++completed === this.MAX_HORSES) {
-          console.log('last race finished');
-          this.processHorsesInfoSaving();
           // the current race finished
+          this.processHorsesInfoSaving();
           this.initiateRaceStartCheck();
         }
       });
@@ -87,7 +88,6 @@ class RaceService {
   }
 
   storeResponse(resp) {
-    console.log(resp);
     if (!resp) {
       // save existing fetched infos to DB
       this.processHorsesInfoSaving();
@@ -97,17 +97,20 @@ class RaceService {
           event = resp.event;
     let horseInfo = {};
     if (this.horsesMap[resp.horse.id] && event === 'finish') {
+      // updating existing info
       horseInfo = {
         ...this.horsesMap[resp.horse.id],
         event: 'finish',
         finishTime: currentTime + resp.time,
       }
     } else {
+      // new entry info
       horseInfo = {
         event: event,
         horseId: resp.horse.id,
         horseName: resp.horse.name,
-        startTime: currentTime + resp.time,
+        startTime: event === 'finish' ? currentTime - resp.time : currentTime + resp.time,
+        finishTime: event === 'finish' ? currentTime + resp.time : null,
       };
     }
     this.horsesMap[resp.horse.id] = horseInfo;
@@ -117,18 +120,27 @@ class RaceService {
     console.log('saving horses info -', this.horsesMap);
     this.saveHorsesInfoToDB(this.horsesMap);
   }
-  saveHorsesInfoToDB(horsesMapArg = {}) {
+  async saveHorsesInfoToDB(horsesMapArg = {}) {
     const horses = Object.values(horsesMapArg);
-    const horsesIds = horses.reduce((prev, horse) => {
-      let newArray = prev;
-      if(horse.event === 'finish') {
-          newArray.push(horse.horseId);
-      }
-      return newArray;
-    }, [])
-    this.removeSavedHorses(horsesIds);
+    try {
+      const savedObj = await raceStoreService.saveRaceStatus(horses);
+      console.log('Saved - ', savedObj);
+      this.updateStartedHorsesEntry(savedObj.inserted);
+      // delete inserted finished race
+      const finishedHorseIds = savedObj.updated || [];
+      this.removeSavedHorses(finishedHorseIds);
+    } catch(error) {
+      this.handleAPIError(error);
+    }
+  }
+  updateStartedHorsesEntry(horsesEntry = []) {
+    // add DB "id" identifier to started horse entries
+    for (let horse of horsesEntry) {
+      this.horsesMap[horse.horseId].id = horse.id;
+    }
   }
   removeSavedHorses(horseIds = []) {
+    // remove horses entry
     for (let id of horseIds) {
       delete this.horsesMap[id];
     }
@@ -136,8 +148,8 @@ class RaceService {
   }
 
   handleAPIError(error) {
+    clearTimeout(this.timeoutId);
     const errorStatus = error && error.status;
-    this.intervalId = clearInterval(this.intervalId);
     if (errorStatus === 401) {
       this.initiateRaceChecks();
     } else if (errorStatus === 204) {
