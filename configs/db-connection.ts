@@ -2,8 +2,16 @@ import mongoose from 'mongoose';
 import config from './config';
 
 class MongoConnection {
-  connectDB() {
-    return mongoose.connect(config.mongoDBPath);
+  connectionObj;
+  async connectDB() {
+    if (this.connectionObj) {
+      return this.connectionObj;
+    }
+    this.connectionObj = await mongoose.connect(config.mongoDBPath);
+    return this.connectionObj;
+  }
+  closeConnection() {
+    this.connectionObj.connection.close();
   }
 }
 
