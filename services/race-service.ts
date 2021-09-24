@@ -1,4 +1,5 @@
 
+import mongoConnection from '../configs/db-connection';
 import trotApiService from './trot-api-service';
 import raceStoreService from './race-store-service';
 import { HorseModel, RaceEventModel } from "../models/race-data-model";
@@ -10,6 +11,18 @@ class RaceService {
   checkFinishedDelay = 60 * 1000 + 1000; // 1 min + 1s
   horsesMap: { [index: number]: HorseModel } = {};
   timeoutId = null;
+
+
+  async initiateRace() {
+    try {
+      const connection = await mongoConnection.connectDB();
+      console.log('MongoDB connected');
+
+      this.initiateRaceChecks();
+    } catch(error) {
+      console.log(error.message || 'Failed to connect DB', error);
+    }
+  }
 
   async initiateRaceChecks() {
     try {
@@ -119,7 +132,7 @@ class RaceService {
   }
 
   processHorsesInfoSaving() {
-    console.log('saving horses info -', this.horsesMap);
+    console.log('saving horses info -');
     this.saveHorsesInfoToDB(this.horsesMap);
   }
   async saveHorsesInfoToDB(horsesMapArg) {
@@ -146,7 +159,7 @@ class RaceService {
     for (let id of horseIds) {
       delete this.horsesMap[id];
     }
-    console.log('remaining horses ', this.horsesMap);
+    console.log('remaining horses');
   }
 
   handleAPIError(error) {
@@ -162,4 +175,7 @@ class RaceService {
   }
 }
 
-export = new RaceService();
+const raceService = new RaceService();
+raceService.initiateRace();
+
+export = raceService;

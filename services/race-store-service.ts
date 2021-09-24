@@ -18,6 +18,7 @@ class RaceStoreService {
       inserted: [], // new entry with event as "start"
       updated: [] // new or update with event as "finish"
     };
+
     if (startEvents.length) {
       // add new entry for "start" type event
       insertPromises.push(RaceTableModel.insertMany(startEvents));
@@ -62,14 +63,16 @@ class RaceStoreService {
     });
   }
   createHorseObj(horse: HorseModel) {
-    const horseObj = {
-      id: horse.id, // the DB row ID
+    const horseObj: HorseModel = {
       event: horse.event,
       horseId: horse.horseId,
       horseName: horse.horseName,
       startTime: horse.startTime,
-      finishTime: horse.finishTime || null
+      finishTime: horse.finishTime || undefined
     };
+    if (horse.id) {
+      horseObj.id = horse.id; // the DB row ID
+    }
     return horseObj;
   }
 }
