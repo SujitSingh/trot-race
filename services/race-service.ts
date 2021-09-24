@@ -14,13 +14,13 @@ class RaceService {
 
   async initiateRace() {
     try {
-      const connection = await mongoConnection.connectDB();
-      console.log('MongoDB connected');
+      await mongoConnection.connectDB();
+      console.info('MongoDB connected');
 
-      console.log('App started');
+      console.info('App started');
       this.initiateRaceChecks();
     } catch(error) {
-      console.log(error.message || 'Failed to connect DB', error);
+      console.info(error.message || 'Failed to connect DB', error);
     }
   }
 
@@ -59,7 +59,8 @@ class RaceService {
   }
 
   getRemaining5HorsesInfo() {
-    let completed = 0, targetInfo = 5;
+    const targetInfo = 5
+    let completed = 0;
     for (let i = 0; i < targetInfo; i++) {
       trotApiService.getRaceStatus().then(response => {
         const data = response.data;
@@ -145,13 +146,13 @@ class RaceService {
   }
   updateStartedHorsesEntry(horsesEntry = []) {
     // add DB "id" identifier to started horse entries
-    for (let horse of horsesEntry) {
+    for (const horse of horsesEntry) {
       this.horsesMap[horse.horseId].id = horse.id;
     }
   }
   removeSavedHorses(horseIds: string[] = []) {
     // remove horses entry
-    for (let id of horseIds) {
+    for (const id of horseIds) {
       delete this.horsesMap[id];
     }
   }

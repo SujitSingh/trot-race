@@ -9,10 +9,10 @@ class App {
         path: path.resolve('./services/race-service.ts')
       }
     });
-    worker.on('message', data => { });
-    worker.on('error', error => { });
+    worker.on('message', data => { console.info(data) });
+    worker.on('error', error => { console.info(error) });
     worker.on('exit', code => {
-      console.log('Exiting');
+      console.info('Exiting -', code);
     });
   }
 }

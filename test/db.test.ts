@@ -1,4 +1,5 @@
-require('dotenv').config(); // for environment variables
+import dotenv from 'dotenv';
+dotenv.config(); // for environment variables
 
 import mongoConnection from '../configs/db-connection';
 import RaceTableModel from '../models/race-table-model';
@@ -28,7 +29,7 @@ describe('MongoDB operations', () => {
 
   beforeAll(done => {
     // remove any previous entry with same randomHorseId
-    RaceTableModel.findOneAndDelete({ horseId: randomHorseId }).then(resp => {
+    RaceTableModel.findOneAndDelete({ horseId: randomHorseId }).then(() => {
       done();
     });
   });

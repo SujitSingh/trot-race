@@ -1,12 +1,12 @@
 import RaceTableModel from '../models/race-table-model';
-import { HorseModel, RaceEventModel } from '../models/race-data-model';
+import { HorseModel } from '../models/race-data-model';
 
 class RaceStoreService {
   saveRaceStatus(horsesEvents = []) {
     // store race events differently in DB on their event-status
     const startEvents = [],
           finishEvents = [];
-    for (let horse of horsesEvents) {
+    for (const horse of horsesEvents) {
       if (horse.event === 'start') {
         startEvents.push(this.createHorseObj(horse));
       } else {
@@ -26,7 +26,7 @@ class RaceStoreService {
     }
     if (finishEvents.length) {
       // update/add entries for "finish" events
-      for (let horse of finishEvents) {
+      for (const horse of finishEvents) {
         updatePromises.push(
           RaceTableModel.updateOne(
             { _id: horse.id },
@@ -49,11 +49,10 @@ class RaceStoreService {
         return updateObj;
       }
       const respInsert = response.slice(0, insertPromises.length);
-      const respUpdate = response.slice(insertPromises.length);
       if (respInsert.length) {
         // add created _id for "start" type events
         const inserts = respInsert[0];
-        for (let insert of inserts) {
+        for (const insert of inserts) {
           updateObj.inserted.push({
             id: insert._id.toString(),
             horseId: insert.horseId
