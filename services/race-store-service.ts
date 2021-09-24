@@ -3,6 +3,7 @@ import { HorseModel, RaceEventModel } from '../models/race-data-model';
 
 class RaceStoreService {
   saveRaceStatus(horsesEvents = []) {
+    // store race events differently in DB on their event-status
     const startEvents = [],
           finishEvents = [];
     for (let horse of horsesEvents) {

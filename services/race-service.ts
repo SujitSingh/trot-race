@@ -12,12 +12,12 @@ class RaceService {
   horsesMap: { [index: number]: HorseModel } = {};
   timeoutId = null;
 
-
   async initiateRace() {
     try {
       const connection = await mongoConnection.connectDB();
       console.log('MongoDB connected');
 
+      console.log('App started');
       this.initiateRaceChecks();
     } catch(error) {
       console.log(error.message || 'Failed to connect DB', error);
@@ -37,7 +37,6 @@ class RaceService {
 
   async initiateRaceStartCheck() {
     try {
-      console.log('race start check');
       clearTimeout(this.timeoutId); // clear previous checks
       const response = await trotApiService.getRaceStatus();
       const data: RaceEventModel = response.data;
@@ -60,7 +59,6 @@ class RaceService {
   }
 
   getRemaining5HorsesInfo() {
-    console.log('getting remaining horses');
     let completed = 0, targetInfo = 5;
     for (let i = 0; i < targetInfo; i++) {
       trotApiService.getRaceStatus().then(response => {
@@ -72,7 +70,6 @@ class RaceService {
         this.handleAPIError(error);
       }).finally(() => {
         if (++completed === targetInfo) {
-          console.log('all horses started');
           this.processHorsesInfoSaving();
           // wait for 60 secs and check for finished status
           setTimeout(() => {
@@ -84,7 +81,7 @@ class RaceService {
   }
 
   getRaceFinishedInfo() {
-    console.log('race finish check');
+    // check and count all finished horses
     let completed = 0;
     for (let i = 0; i < this.MAX_HORSES; i++) {
       trotApiService.getRaceStatus().then(response => {
@@ -132,14 +129,12 @@ class RaceService {
   }
 
   processHorsesInfoSaving() {
-    console.log('saving horses info -');
     this.saveHorsesInfoToDB(this.horsesMap);
   }
   async saveHorsesInfoToDB(horsesMapArg) {
     const horses = Object.values(horsesMapArg);
     try {
       const savedObj = await raceStoreService.saveRaceStatus(horses);
-      console.log('Saved - ', savedObj);
       this.updateStartedHorsesEntry(savedObj.inserted);
       // delete inserted finished race
       const finishedHorseIds = savedObj.updated || [];
@@ -159,7 +154,6 @@ class RaceService {
     for (let id of horseIds) {
       delete this.horsesMap[id];
     }
-    console.log('remaining horses');
   }
 
   handleAPIError(error) {
