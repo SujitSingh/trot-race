@@ -1,6 +1,6 @@
-## Trot Race
+# Trot Race
 
-### Installation instruction
+## Installation
 To install required dependencies run any of followings
 
 **Using Yarn**
@@ -13,20 +13,19 @@ yarn install
 npm install
 ```
 
-### Configurations
-This application uses MongoDB as DB. Required configurations value could be added under the file `.env`. Followings steps helps in updating required configuration values.
+## Configurations
+This application uses MongoDB whose configurations values could be modified under `.env`.
 
-1. MongoDB connection configuration should be updated using `MONGO_HOST`, `MONGO_DB_NAME`, `MONGO_USER` and `MONGO_PASSWORD`.
-2. In the same `.env` file, update the `API_ROOT` and `API_PASSWORD` to the desired values. Value of `API_EMAIL` can also be updated, if needed.
+## Running Application
+This app can be ran under docker container by following command
 
-### Running Application
-Depending on installation command, any of following would start the application.
 ```
-yarn start
-```
-```
-npm start
+docker-compose up
 ```
 
-### App start confirmation
-There is a app start console log during app start time. Further updates could only be monitored using actual DB entries.
+## Start Confirmation
+There are start app console logs during start and updates. DB entries could be monitored by connecting to container DB on 
+
+```
+mongodb://sujit:passw0rd@localhost:8989/trot_race?authSource=admin
+```

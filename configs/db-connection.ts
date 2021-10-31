@@ -4,6 +4,7 @@ import config from './config';
 class MongoConnection {
   connectionObj;
   async connectDB() {
+    console.info('Connecting DB');
     if (this.connectionObj) {
       return this.connectionObj;
     }

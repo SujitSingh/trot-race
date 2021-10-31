@@ -1,9 +1,21 @@
+const {
+  PORT,
+  API_ROOT,
+  MONGO_USER,
+  MONGO_PASSWORD,
+  MONGO_HOST,
+  MONGO_PORT,
+  MONGO_DB_NAME,
+  API_EMAIL,
+  API_PASSWORD
+} = process.env;
+
 export = {
-  PORT: process.env.PORT || 3580,
-  apiRoot: process.env.API_ROOT,
-  mongoDBPath: `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_HOST}/${process.env.MONGO_DB_NAME}`,
+  PORT: PORT || 3580,
+  apiRoot: API_ROOT,
+  mongoDBPath: `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB_NAME}?authSource=admin`,
   user: {
-    email: process.env.API_EMAIL,
-    password: process.env.API_PASSWORD,
+    email: API_EMAIL || 'someone@email.com',
+    password: API_PASSWORD || 'lTgAYaLP9jRs',
   }
 }

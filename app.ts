@@ -3,6 +3,7 @@ import path from 'path';
 
 class App {
   initiateApp() {
+    console.info('Initiating app')
     // initialize the app worker
     const worker = new Worker('./services/import-worker.js', {
       workerData: {

@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  mongodb:
+    image: mongo:5.0.2
+    # restart: unless-stopped
+    env_file: ./.env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: $MONGO_USER
+      MONGO_INITDB_ROOT_PASSWORD: $MONGO_PASSWORD
+    ports:
+      - $MONGO_PORT_DOCKER:$MONGO_PORT
+    networks: 
+      - trot-race-app
+    volumes:
+      - ${HOME}/workspace/trot-race/mongo:/data/db
+
+  node:
+    depends_on:
+      - mongodb
+    # restart: unless-stopped
+    env_file: ./.env
+    build: .
+    # volumes:
+    #   - ./:/usr/src/app/trot-race
+    #   - /usr/src/app/node_modules
+    environment:
+      - MONGO_HOST=mongodb
+    networks: 
+      - trot-race-app
+
+networks:
+  trot-race-app:
+    driver: bridge

@@ -135,6 +135,7 @@ class RaceService {
   async saveHorsesInfoToDB(horsesMapArg) {
     const horses = Object.values(horsesMapArg);
     try {
+      console.info(horses);
       const savedObj = await raceStoreService.saveRaceStatus(horses);
       this.updateStartedHorsesEntry(savedObj.inserted);
       // delete inserted finished race
